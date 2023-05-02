@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_INPUT_SIZE 100
+
+typedef enum {
+    TERMINAL_A,
+    TERMINAL_PLUS,
+    END,
+    ERROR
+} Token;
+
+Token lookahead;
+char input[MAX_INPUT_SIZE];
+int ind = 0;
+int success = 1;
+
+Token get_token() {
+    char c = input[ind++];
+    while (isspace(c)) {
+        c = input[ind++];
+    }
+    switch (c) {
+        case 'a':
+            return TERMINAL_A;
+        case '+':
+            return TERMINAL_PLUS;
+        case '\0':
+            return END;
+    }
+    success = 0;
+    return ERROR;
+}
+
+void S();
+void B();
+
+void match(Token expected) {
+    if (lookahead == expected) {
+        lookahead = get_token();
+    } else {
+        printf("Error: expected %d, got %d\n", expected, lookahead);
+        success = 0;
+    }
+}
+
+void S() {
+    match(TERMINAL_A);
+    B();
+}
+
+void B() {
+    if (lookahead == TERMINAL_PLUS) {
+        match(TERMINAL_PLUS);
+        match(TERMINAL_A);
+        B();
+    }
+}
+
+int main() {
+    printf("Enter an expression: ");
+    fgets(input, MAX_INPUT_SIZE, stdin);
+    lookahead = get_token();
+    S();
+    if (success && lookahead == END) {
+        printf("Parsing successful\n");
+    } else {
+        printf("Parsing unsuccessful\n");
+    }
+    return 0;
+}
+input: abbb
