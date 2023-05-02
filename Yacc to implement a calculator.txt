@@ -1,0 +1,56 @@
+8. Write a program in Yacc to implement a calculator
+
+%{
+#include <stdio.h>
+#include <math.h>
+%}
+
+%token NUMBER
+%left '+' '-'
+%left '*' '/'
+%right '^'
+
+%%
+
+input: /* empty */
+     | input line
+     ;
+
+line: '\n'
+    | exp '\n' { printf("%.2f\n", $1); }
+    ;
+
+exp: NUMBER            { $$ = $1; }
+   | exp '+' exp      { $$ = $1 + $3; }
+   | exp '-' exp      { $$ = $1 - $3; }
+   | exp '*' exp      { $$ = $1 * $3; }
+   | exp '/' exp      { $$ = $1 / $3; }
+   | exp '^' exp      { $$ = pow($1, $3); }
+   | '(' exp ')'      { $$ = $2; }
+   | '-' exp %prec '-' { $$ = -$2; }
+   ;
+
+%%
+
+int main() {
+    yyparse();
+    return 0;
+}
+
+int yyerror(const char* s) {
+    fprintf(stderr, "Error: %s\n", s);
+    return 0;
+}
+
+int yylex() {
+    int c = getchar();
+    if (c == EOF) {
+        return 0;
+    } else if (isdigit(c) || c == '.') {
+        ungetc(c, stdin);
+        scanf("%lf", &yylval);
+        return NUMBER;
+    } else {
+        return c;
+    }
+}

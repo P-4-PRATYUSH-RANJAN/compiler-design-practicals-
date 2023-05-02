@@ -1,0 +1,18 @@
+%{
+int word_count = 0;
+%}
+
+%%
+[a-zA-Z]+   { word_count++; }  /* Match one or more letters */
+[ \t\n]+    { /* Ignore whitespace */ }
+.           { /* Ignore everything else */ }
+%%
+
+int main() {
+    yylex(); /* Run the lexer */
+    printf("Number of words: %d\n", word_count);
+    return 0;
+}
+lex wordcount.l
+cc lex.yy.c -o wordcount -ll
+./wordcount

@@ -1,0 +1,30 @@
+%{
+int vowel_count = 0;
+int consonant_count = 0;
+%}
+
+%%
+[aAeEiIoOuU]   { vowel_count++; }     /* Match vowels */
+[a-zA-Z]       { consonant_count++; } /* Match consonants */
+[ \t\n]+       { /* Ignore whitespace */ }
+.              { /* Ignore everything else */ }
+%%
+
+int yywrap() {
+    return 1;
+}
+
+int main() {
+    char input[256];
+    printf("Enter a string: ");
+    fgets(input, sizeof(input), stdin); /* Read input from user */
+    yy_scan_string(input); /* Set the input for the lexer */
+    yylex(); /* Run the lexer */
+    printf("Number of vowels: %d\n", vowel_count);
+    printf("Number of consonants: %d\n", consonant_count);
+    return 0;
+}
+
+flex lex.l
+gcc lex.yy.c
+a.exe

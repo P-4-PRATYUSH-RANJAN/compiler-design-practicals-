@@ -1,0 +1,134 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_INPUT_SIZE 100
+
+typedef enum {
+    ID,
+    PLUS,
+    MINUS,
+    MULT,
+    DIV,
+    LPAREN,
+    RPAREN,
+    END,
+    ERROR
+} Token;
+
+Token lookahead;
+char input[MAX_INPUT_SIZE];
+int index = 0;
+int success = 1;
+
+Token get_token() {
+    char c = input[index++];
+    while (isspace(c)) {
+        c = input[index++];
+    }
+    switch (c) {
+        case '+':
+            return PLUS;
+        case '-':
+            return MINUS;
+        case '*':
+            return MULT;
+        case '/':
+            return DIV;
+        case '(':
+            return LPAREN;
+        case ')':
+            return RPAREN;
+        case '\0':
+            return END;
+        default:
+            if (isalpha(c)) {
+                return ID;
+            }
+            printf("Error: unexpected character %c\n", c);
+            success = 0;
+            return ERROR;
+    }
+}
+
+void expr();
+void term();
+void factor();
+void id();
+
+void match(Token expected) {
+    if (lookahead == expected) {
+        lookahead = get_token();
+    } else {
+        printf("Error: expected %d, got %d\n", expected, lookahead);
+        success = 0;
+    }
+}
+
+void id() {
+    match(ID);
+}
+
+void factor() {
+    switch (lookahead) {
+        case ID:
+            id();
+            break;
+        case LPAREN:
+            match(LPAREN);
+            expr();
+            match(RPAREN);
+            break;
+        default:
+            printf("Error: expected ID or LPAREN, got %d\n", lookahead);
+            success = 0;
+            break;
+    }
+}
+
+void term() {
+    factor();
+    while (lookahead == MULT || lookahead == DIV) {
+        switch (lookahead) {
+            case MULT:
+                match(MULT);
+                factor();
+                break;
+            case DIV:
+                match(DIV);
+                factor();
+                break;
+        }
+    }
+}
+
+void expr() {
+    term();
+    while (lookahead == PLUS || lookahead == MINUS) {
+        switch (lookahead) {
+            case PLUS:
+                match(PLUS);
+                term();
+                break;
+            case MINUS:
+                match(MINUS);
+                term();
+                break;
+        }
+    }
+}
+
+int main() {
+    printf("Enter an expression: ");
+    fgets(input, MAX_INPUT_SIZE, stdin);
+    lookahead = get_token();
+    expr();
+    if (success && lookahead == END) {
+        printf("Parsing successful\n");
+    } else {
+        printf("Parsing unsuccessful\n");
+    }
+    return 0;
+}
+input: a+b

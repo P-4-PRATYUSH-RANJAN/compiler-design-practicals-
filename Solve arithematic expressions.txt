@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include<string.h>
+
+int addsub();
+int muldiv();
+int term();
+
+char input[101];
+int pos = 0;
+
+int term(){
+  int n = 0;
+
+  if(input[pos] == '('){
+    pos++;
+    n = addsub();
+    
+    if(input[pos] == ')'){
+      pos++;
+      return n;
+    }
+  }else{
+    while('0' <= input[pos] && input[pos] <= '9'){
+      n = n*10 + (input[pos] - '0');
+      pos++;
+    }
+  }
+  return n;
+}
+
+int muldiv(){
+  int first,second;
+  
+  first = term();
+  for(;;){
+    if(input[pos] == '*'){
+      pos++;
+      second = term();
+      first *= second; 
+    }else if(input[pos] == '/'){
+      pos++;
+      second = term();
+      first /= second;
+    }else{
+      return first;
+    }
+  }
+}
+
+int addsub(){
+  int first,second;
+  
+  first = muldiv();
+  
+  for(;;){
+    if(input[pos] == '+'){
+      pos++;
+      second = muldiv();
+      first += second; 
+    }else if(input[pos] == '-'){
+      pos++;
+      second = muldiv();
+      first -= second;
+    }else{
+      return first;
+    }
+  }
+  
+}
+
+int main(){
+  int n,i,j;
+  printf("Input an expression using +, -, *, / operators:\n");
+  scanf("%s",input);
+  printf("%d\n",addsub());  
+  return 0;
+  }

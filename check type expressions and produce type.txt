@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef enum {
+    TYPE_INT,
+    TYPE_FLOAT,
+    TYPE_BOOL,
+    TYPE_ERROR
+} Type;
+
+typedef struct {
+    Type type;
+    union {
+        int i;
+        float f;
+        int b;
+    } value;
+} Expr;
+
+typedef struct {
+    Type left;
+    Type right;
+} Assignment;
+
+Assignment assignments[100];
+int num_assignments = 0;
+
+void check_type(Expr* expr) {
+    if (expr->type == TYPE_ERROR) {
+        return;
+    }
+    if (expr->type == TYPE_INT || expr->type == TYPE_FLOAT || expr->type == TYPE_BOOL) {
+        return;
+    }
+    printf("Error: Unknown type %d\n", expr->type);
+    expr->type = TYPE_ERROR;
+}
+
+void check_assignment(Expr* left, Expr* right) {
+    if (left->type == TYPE_ERROR || right->type == TYPE_ERROR) {
+        return;
+    }
+    if (left->type == right->type) {
+        assignments[num_assignments].left = left->type;
+        assignments[num_assignments].right = right->type;
+        num_assignments++;
+        return;
+    }
+    printf("Error: Incompatible types %d and %d in assignment\n", left->type, right->type);
+    left->type = TYPE_ERROR;
+}
+
+int main() {
+    Expr a = { TYPE_INT, .value.i = 5 };
+    Expr b = { TYPE_FLOAT, .value.f = 3.14 };
+    Expr c = { TYPE_BOOL, .value.b = 1 };
+    Expr d = { TYPE_ERROR };
+
+    check_type(&a);
+    check_type(&b);
+    check_type(&c);
+    check_type(&d);
+
+    check_assignment(&a, &b);
+    check_assignment(&b, &c);
+    check_assignment(&c, &d);
+    check_assignment(&a, &a);
+
+    printf("Assignments:\n");
+    int i;
+    for(i = 0; i < num_assignments; i++) {
+        printf("%d = %d\n", assignments[i].left, assignments[i].right);
+    }
+
+    return 0;
+}

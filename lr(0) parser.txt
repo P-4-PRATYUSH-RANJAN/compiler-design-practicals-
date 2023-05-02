@@ -1,0 +1,134 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_INPUT_SIZE 100
+#define MAX_STACK_SIZE 100
+
+typedef enum {
+    ID,
+    PLUS,
+    TIMES,
+    LPAREN,
+    RPAREN,
+    END,
+    ERROR
+} Token;
+
+Token lookahead;
+char input[MAX_INPUT_SIZE];
+int ind = 0;
+int success = 1;
+int stack[MAX_STACK_SIZE];
+int top = -1;
+
+void shift(Token token);
+void reduce();
+
+Token get_token() {
+    char c = input[ind++];
+    while (isspace(c)) {
+        c = input[ind++];
+    }
+    switch (c) {
+        case 'a':
+            return ID;
+        case '+':
+            return PLUS;
+        case '*':
+            return TIMES;
+        case '(':
+            return LPAREN;
+        case ')':
+            return RPAREN;
+        case '\0':
+            return END;
+    }
+    success = 0;
+    return ERROR;
+}
+
+void shift(Token token) {
+    stack[++top] = token;
+    lookahead = get_token();
+}
+
+void reduce() {
+    switch (stack[top]) {
+        case ID:
+            printf("ID ");
+            top--;
+            break;
+        case PLUS:
+            printf("+ ");
+            top--;
+            break;
+        case TIMES:
+            printf("* ");
+            top--;
+            break;
+        case RPAREN:
+            top--;
+            while (stack[top] != LPAREN) {
+                top--;
+            }
+            top--;
+            break;
+        default:
+            printf("Error: invalid reduction\n");
+            success = 0;
+            break;
+    }
+}
+
+void parse() {
+    while (success) {
+        switch (stack[top]) {
+            case ID:
+            case PLUS:
+            case TIMES:
+                if (lookahead == stack[top]) {
+                    shift(lookahead);
+                } else {
+                    reduce();
+                }
+                break;
+            case LPAREN:
+                if (lookahead == RPAREN) {
+                    printf("Error: empty parentheses\n");
+                    success = 0;
+                } else {
+                    shift(lookahead);
+                }
+                break;
+            case END:
+                if (lookahead == END) {
+                    printf("\nParsing successful\n");
+                    return;
+                } else {
+                    printf("Error: expected END, got %d\n", lookahead);
+                    success = 0;
+                }
+                break;
+            default:
+                printf("Error: invalid symbol\n");
+                success = 0;
+                break;
+        }
+    }
+    printf("\nParsing unsuccessful\n");
+}
+
+int main() {
+    printf("Enter a string: ");
+    fgets(input, MAX_INPUT_SIZE, stdin);
+    shift(END);
+    parse();
+    return 0;
+}
+
+o/p:-
+Enter a string: a + (a * a)
+
+ID + ( ID * ID ) 

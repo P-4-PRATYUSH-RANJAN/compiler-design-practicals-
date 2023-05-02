@@ -1,0 +1,51 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct node {
+    char* value;
+    struct node *left;
+    struct node *right;
+} Node;
+
+Node* createNode(char* value, Node* left, Node* right) {
+    Node* node = (Node*)malloc(sizeof(Node));
+    node->value = value;
+    node->left = left;
+    node->right = right;
+    return node;
+}
+
+void printSyntaxTree(Node* node, int depth) {
+    if (node == NULL) {
+        return;
+    }
+    printSyntaxTree(node->right, depth + 1);
+    int i;
+    for (i = 0; i < depth; i++) {
+        printf("    ");
+    }
+    printf("%s\n", node->value);
+    printSyntaxTree(node->left, depth + 1);
+}
+
+int main() {
+    // Create the syntax tree for "printf("Hello, %s", name);"
+    Node* name = createNode("name", NULL, NULL);
+    Node* format_string = createNode("\"Hello, %s\"", NULL, name);
+    Node* print = createNode("printf", format_string, NULL);
+    
+    // Print the syntax tree
+    printf("Syntax tree for \"printf(\"Hello, %%s\", name);\"\n");
+    printSyntaxTree(print, 0);
+    
+    // Create the syntax tree for "scanf("%d", &num);"
+    Node* num = createNode("&num", NULL, NULL);
+    Node* format = createNode("\"%d\"", NULL, num);
+    Node* scan = createNode("scanf", format, NULL);
+    
+    // Print the syntax tree
+    printf("Syntax tree for \"scanf(\"%%d\", &num);\"\n");
+    printSyntaxTree(scan, 0);
+    
+    return 0;
+}

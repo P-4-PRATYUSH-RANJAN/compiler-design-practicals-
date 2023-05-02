@@ -1,0 +1,54 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct node {
+    char* value;
+    struct node *left;
+    struct node *right;
+} Node;
+
+Node* createNode(char* value, Node* left, Node* right) {
+    Node* node = (Node*)malloc(sizeof(Node));
+    node->value = value;
+    node->left = left;
+    node->right = right;
+    return node;
+}
+
+void printSyntaxTree(Node* node, int depth) {
+    if (node == NULL) {
+        return;
+    }
+    printSyntaxTree(node->right, depth + 1);
+    int i;
+    for (i = 0; i < depth; i++) {
+        printf("    ");
+    }
+    printf("%s\n", node->value);
+    printSyntaxTree(node->left, depth + 1);
+}
+
+int main() {
+    // Create the syntax tree for a conditional statement
+    Node* condition = createNode("x > 0", NULL, NULL);
+    Node* body = createNode("printf(\"Positive\");", NULL, NULL);
+    Node* if_statement = createNode("if", condition, body);
+    
+    // Print the syntax tree
+    printf("Syntax tree for an if statement\n");
+    printSyntaxTree(if_statement, 0);
+    
+    // Create the syntax tree for a loop
+    Node* initialization = createNode("i = 0", NULL, NULL);
+    Node* test = createNode("i < n", NULL, NULL);
+    Node* update = createNode("i++", NULL, NULL);
+    Node* loop_body = createNode("printf(\"%d\\n\", i);", NULL, NULL);
+    Node* for_loop = createNode("for", initialization, createNode(";", test, update));
+    for_loop = createNode(for_loop->value, for_loop, loop_body);
+    
+    // Print the syntax tree
+    printf("Syntax tree for a for loop\n");
+    printSyntaxTree(for_loop, 0);
+    
+    return 0;
+}

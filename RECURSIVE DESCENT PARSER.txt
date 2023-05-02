@@ -1,0 +1,116 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_INPUT_SIZE 100
+
+typedef enum {
+    LPAREN,
+    RPAREN,
+    PLUS,
+    MULT,
+    ID,
+    END,
+    ERROR
+} Token;
+
+Token lookahead;
+char input[MAX_INPUT_SIZE];
+int index = 0;
+int success = 1;
+
+Token get_token() {
+    char c = input[index++];
+    while (isspace(c)) {
+        c = input[index++];
+    }
+    switch (c) {
+        case '(':
+            return LPAREN;
+        case ')':
+            return RPAREN;
+        case '+':
+            return PLUS;
+        case '*':
+            return MULT;
+        case 'i':
+            if (input[index] == 'd') {
+                index++;
+                return ID;
+            } else {
+                break;
+            }
+        case '\0':
+            return END;
+    }
+    success = 0;
+    return ERROR;
+}
+
+void E();
+void Eprime();
+void T();
+void Tprime();
+void F();
+
+void match(Token expected) {
+    if (lookahead == expected) {
+        lookahead = get_token();
+    } else {
+        printf("Error: expected %d, got %d\n", expected, lookahead);
+        success = 0;
+    }
+}
+
+void E() {
+    T();
+    Eprime();
+}
+
+void Eprime() {
+    if (lookahead == PLUS) {
+        match(PLUS);
+        T();
+        Eprime();
+    }
+}
+
+void T() {
+    F();
+    Tprime();
+}
+
+void Tprime() {
+    if (lookahead == MULT) {
+        match(MULT);
+        F();
+        Tprime();
+    }
+}
+
+void F() {
+    if (lookahead == LPAREN) {
+        match(LPAREN);
+        E();
+        match(RPAREN);
+    } else if (lookahead == ID) {
+        match(ID);
+    } else {
+        printf("Error: expected LPAREN or ID, got %d\n", lookahead);
+        success = 0;
+    }
+}
+
+int main() {
+    printf("Enter an expression: ");
+    fgets(input, MAX_INPUT_SIZE, stdin);
+    lookahead = get_token();
+    E();
+    if (success && lookahead == END) {
+        printf("Parsing successful\n");
+    } else {
+        printf("Parsing unsuccessful\n");
+    }
+    return 0;
+}
