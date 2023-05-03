@@ -1,0 +1,45 @@
+10. write a c progarm to detect valid email addresses. <name>@<domain>.com
+
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
+bool isValidEmail(char email[]) {
+    int i, atPosition = -1, dotPosition = -1;
+    int len = strlen(email);
+    
+    // Find the position of "@" and "."
+    for (i = 0; i < len; i++) {
+        if (email[i] == '@') {
+            atPosition = i;
+        } else if (email[i] == '.') {
+            dotPosition = i;
+        }
+    }
+    
+    // Check if "@" and "." are present and in the correct positions
+    if (atPosition == -1 || dotPosition == -1 || atPosition > dotPosition) {
+        return false;
+    }
+    
+    // Check if the domain name is valid (i.e. ends with ".com")
+    if (strcmp(email + dotPosition + 1, "com") != 0) {
+        return false;
+    }
+    
+    return true;
+}
+
+int main() {
+    char email[100];
+    printf("Enter an email address: ");
+    scanf("%s", email);
+    
+    if (isValidEmail(email)) {
+        printf("Valid email address\n");
+    } else {
+        printf("Invalid email address\n");
+    }
+    
+    return 0;
+}
