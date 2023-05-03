@@ -1,0 +1,98 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_PROD 50
+#define MAX_LEN 10
+
+// Function to check if a character is a non-terminal symbol
+int is_non_terminal(char ch) {
+    return isupper(ch);
+}
+
+// Function to check if a character is a terminal symbol
+int is_terminal(char ch) {
+    return islower(ch) || ch == '$';
+}
+
+// Function to find the first set of a non-terminal symbol
+void find_first(char non_terminal, char prod[MAX_PROD][MAX_LEN], int n) {
+    int i, j, k, m;
+    char first_set[MAX_LEN], temp_set[MAX_LEN];
+    int epsilon_flag;
+
+    first_set[0] = '\0';
+
+    for (i = 0; i < n; i++) {
+        if (prod[i][0] == non_terminal) {
+            // Check if production rule generates epsilon
+            if (prod[i][2] == '$') {
+                strcat(first_set, "$");
+            }
+            // Check if production rule generates a terminal symbol
+            else if (is_terminal(prod[i][2])) {
+                strncat(first_set, &prod[i][2], 1);
+            }
+            // Check if production rule generates a non-terminal symbol
+            else if (is_non_terminal(prod[i][2])) {
+                // Recursively find the first set of the non-terminal symbol
+                find_first(prod[i][2], prod, n);
+                strcpy(temp_set, first_set);
+
+                // Check if the non-terminal symbol generates epsilon
+                epsilon_flag = 0;
+                for (j = 0; j < strlen(temp_set); j++) {
+                    if (temp_set[j] == '$') {
+                        epsilon_flag = 1;
+                        break;
+                    }
+                }
+
+                // Add the first set of the non-terminal symbol to the first set of the current non-terminal symbol
+                for (j = 0; j < strlen(temp_set); j++) {
+                    if (temp_set[j] != '$') {
+                        strncat(first_set, &temp_set[j], 1);
+                    }
+                }
+
+                // If the non-terminal symbol generates epsilon, continue with the next production rule
+                if (epsilon_flag) {
+                    continue;
+                }
+            }
+        }
+    }
+
+    // Print the first set of the non-terminal symbol
+    printf("FIRST(%c) = { ", non_terminal);
+    for (k = 0; k < strlen(first_set); k++) {
+        if (k == strlen(first_set) - 1) {
+            printf("%c", first_set[k]);
+        } else {
+            printf("%c, ", first_set[k]);
+        }
+    }
+    printf(" }\n");
+}
+
+int main() {
+    int i, n;
+    char non_terminal;
+    char prod[MAX_PROD][MAX_LEN];
+
+    printf("Enter the number of production rules: ");
+    scanf("%d", &n);
+
+    printf("Enter the production rules:\n");
+    for (i = 0; i < n; i++) {
+        scanf("%s", prod[i]);
+    }
+
+    printf("Enter the non-terminal symbol to find the first set of: ");
+    scanf(" %c", &non_terminal);
+
+    find_first(non_terminal, prod, n);
+
+    return 0;
+}
