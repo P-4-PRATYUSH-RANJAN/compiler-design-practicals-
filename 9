@@ -1,0 +1,36 @@
+9. write a C program to simulate lexical analyser for validating operators.
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+// Function to validate the given operator
+int validate_operator(char op[]) {
+    // List of valid operators
+    char operators[] = {"+", "-", "", "/", "%", "=", "<", ">", "&", "|", "!", "^", "~", ">>", "<<", "==", "!=", "<=", ">=", "&&", "||"};
+
+    int num_operators = sizeof(operators) / sizeof(char *);
+
+    for (int i = 0; i < num_operators; i++) {
+        if (strcmp(op, operators[i]) == 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int main() {
+    char input[100];
+
+    printf("Enter an operator: ");
+    scanf("%s", input);
+
+    if (validate_operator(input)) {
+        printf("%s is a valid operator\n", input);
+    } else {
+        printf("%s is not a valid operator\n", input);
+    }
+
+    return 0;
+}
