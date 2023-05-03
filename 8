@@ -1,0 +1,47 @@
+8 write a lex program to count the frequency of the given word in a file and length of the longest word in the file
+
+%{
+#include <stdio.h>
+#include <string.h>
+
+int word_count = 0;
+int max_length = 0;
+char target_word[50] = "example";
+%}
+
+%%
+[a-zA-Z]+ {
+    int len = strlen(yytext);
+    if (len > max_length) {
+        max_length = len;
+    }
+    if (strcmp(yytext, target_word) == 0) {
+        word_count++;
+    }
+}
+
+. ; /* ignore other characters */
+
+%%
+
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        printf("Usage: %s filename\n", argv[0]);
+        return 1;
+    }
+    yyin = fopen(argv[1], "r");
+    if (yyin == NULL) {
+        printf("Failed to open file %s\n", argv[1]);
+        return 1;
+    }
+    yylex();
+    printf("Frequency of \"%s\": %d\n", target_word, word_count);
+    printf("Length of the longest word: %d\n", max_length);
+    return 0;
+}
+
+flex 8.l
+gcc lex.yy.c -o 8
+8 8.txt
+
+filename is 8.txt and 8.l
